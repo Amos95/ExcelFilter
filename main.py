@@ -11,9 +11,6 @@ from tkinter.filedialog import askdirectory
 import openpyxl
 import os
 
-import win32con
-import win32ui
-
 _SUFFIX_LIT = ['.xls', '.xlsx']
 _OUTPUT_NAME = 'result'
 _OUTPUT_SUFFIX = '.xlsx'
@@ -40,10 +37,13 @@ def obtain_excel_files(folder_path):
     """
     excel_list = []
     walk = os.walk(folder_path)
-    for path, dir_list, file_list in walk:
+    for cur_path, dir_list, file_list in walk:
+        print(dir_list)
         for file_name in file_list:
             if os.path.splitext(file_name)[-1] in _SUFFIX_LIT:
-                excel_list.append(os.path.join(path, file_name))
+                if _OUTPUT_FOLDER not in cur_path:
+                    print(os.path.dirname(os.path.join(cur_path, file_name)))
+                    excel_list.append(os.path.join(cur_path, file_name))
     return excel_list
 
 
@@ -66,7 +66,12 @@ class ExcelFilter:
     def write_result(self, key_row):
         if not os.path.exists(self.output_path):
             os.mkdir(self.output_path)
-        out_wb = openpyxl.Workbook()
+        # f = open(self.output_file, 'w')
+        # f.close()
+        if not os.path.exists(self.output_file):
+            out_wb = openpyxl.Workbook()
+        else:
+            out_wb = openpyxl.load_workbook(self.output_file)
         for key, value_rows in key_row.items():
             if not(self.__thread.get_thread_status()):
                 break
@@ -161,6 +166,8 @@ class FilterThread(threading.Thread):
     def run(self):
         excel_filter = ExcelFilter(self, os.path.join(self.path, _OUTPUT_FOLDER))
         excel_filter.filter_main(self.path, self.keys)
+        print("Done!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+        print("ÕÍ≥…¡À..........................................")
 
     # Need to get rid of the repetition
 
